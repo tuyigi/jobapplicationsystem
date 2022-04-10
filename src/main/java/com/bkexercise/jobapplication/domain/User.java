@@ -8,9 +8,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.util.Date;
 
-@Entity(name= "users")
+
 @Table
-//@SequenceGenerator(name="PRIVATE_SEQ", sequenceName="private_sequence")
+@Entity(name= "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="PRIVATE_SEQ")

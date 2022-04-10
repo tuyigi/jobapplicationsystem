@@ -8,7 +8,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 import java.util.Date;
 
 
@@ -28,7 +27,11 @@ public class JobApplicationDto {
     private Date birth_date;
     @Enumerated(EnumType.STRING)
     private EGenderType gender;
+    private String country;
 
+    public String getCountry() {
+        return country;
+    }
 
     public String getFirst_name() {
         return first_name;

@@ -2,11 +2,18 @@ package com.bkexercise.jobapplication.service;
 
 import com.bkexercise.jobapplication.config.Config;
 import com.bkexercise.jobapplication.dao.JobApplicationRepo;
+import com.bkexercise.jobapplication.dao.UserRepo;
 import com.bkexercise.jobapplication.domain.JobApplication;
+import com.bkexercise.jobapplication.domain.User;
 import com.bkexercise.jobapplication.model.JobApplicationDto;
 import com.bkexercise.jobapplication.model.JobApplicationResponseDto;
 import com.bkexercise.jobapplication.model.ResponseDto;
 import com.bkexercise.jobapplication.util.EApplicationStatus;
+import com.bkexercise.jobapplication.util.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -17,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -33,8 +41,14 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     Config config;
     @Autowired
     JobApplicationRepo jobApplicationRepo;
+    @Autowired
+    private JwtUtil tokenUtil;
 
-    // save application step one
+
+    @Autowired
+    UserRepo userRepo;
+    @Autowired
+    HttpServletRequest request;
 
     @Override
     public ResponseEntity<ResponseDto> saveOne(JobApplicationDto jobApplicationDto) {
@@ -73,6 +87,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
             jobApplication.setLastName(jobApplicationDto.getLast_name());
             jobApplication.setEmail(jobApplicationDto.getEmail());
             jobApplication.setPhoneNumber(jobApplicationDto.getPhone_number());
+            jobApplication.setCountry(jobApplicationDto.getCountry());
             jobApplication.setStatus(EApplicationStatus.PENDING);
 
             // save job application when every validation passed
@@ -110,8 +125,18 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                 return new ResponseEntity<>(new ResponseDto(HttpStatus.BAD_REQUEST,"Already dropped"),HttpStatus.BAD_REQUEST);
             }
 
-            // then we drop the application
+            // get the user who is dropping the application just for traceability
 
+            Optional<User> exist=userRepo.findByUsername(getUsername());
+            if(!exist.isPresent()){
+               return new ResponseEntity<>(new ResponseDto(HttpStatus.BAD_REQUEST,"Invalid user"),HttpStatus.BAD_REQUEST);
+            }
+            User user=exist.get();
+
+
+
+            // then we drop the application
+            existObj.setUpdatedBy(user);
             existObj.setStatus(EApplicationStatus.DROPPED);
             jobApplicationRepo.save(existObj);
 
@@ -144,6 +169,19 @@ public class JobApplicationServiceImpl implements JobApplicationService {
             if (existObj.getStatus().equals(EApplicationStatus.PASSED)) {
                 return new ResponseEntity<>(new ResponseDto(HttpStatus.BAD_REQUEST, "Job application is already passed!"), HttpStatus.BAD_REQUEST);
             }
+
+            // get the user who is dropping the application just for traceability
+
+            Optional<User> existUser=userRepo.findByUsername(getUsername());
+            if(!existUser.isPresent()){
+                return new ResponseEntity<>(new ResponseDto(HttpStatus.BAD_REQUEST,"Invalid user"),HttpStatus.BAD_REQUEST);
+            }
+            User user=existUser.get();
+
+
+            // then we drop the application
+            existObj.setUpdatedBy(user);
+            existObj.setUpdatedBy(user);
 
             // pass the job application
 
@@ -257,6 +295,19 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         }
         // get first ten and in alphabetic order
 
+    }
+
+    // get username
+    private String getUsername() {
+        final String requestTokenHeader = request.getHeader("Authorization");
+        String token = requestTokenHeader.substring(7);
+        String username=null;
+        try {
+            username = tokenUtil.getUsernameFromToken(token);
+        } catch (ExpiredJwtException | MalformedJwtException | SignatureException
+                | UnsupportedJwtException | IllegalArgumentException e) {
+        }
+        return username;
     }
 
 

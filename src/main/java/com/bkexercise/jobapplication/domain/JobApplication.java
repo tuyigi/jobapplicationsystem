@@ -5,16 +5,19 @@ import javax.persistence.*;
 import com.bkexercise.jobapplication.util.EApplicationStatus;
 import com.bkexercise.jobapplication.util.EDegreeType;
 import com.bkexercise.jobapplication.util.EGenderType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.istack.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serializable;
 import java.util.Date;
 
 
-@Entity(name = "job_application")
+
 @Table
-public class JobApplication  {
+@Entity(name = "job_application")
+public class JobApplication implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,9 +49,19 @@ public class JobApplication  {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private Date updatedAt;
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "updated_by")
     private User updatedBy;
+    private String country;
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 
     public long getId() {
         return id;
