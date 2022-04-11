@@ -18,6 +18,7 @@ import springfox.documentation.service.AuthorizationScope;
 import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class SwaggerConfig {
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.bkexercise"))
                 .build()
-                .apiInfo(apiInfo()).securitySchemes(securitySchemes()).securityContexts(List.of(securityContext()));
+                .apiInfo(apiInfo()).securitySchemes(securitySchema()).securityContexts(listOf(securityContext()));
     }
 
     private ApiInfo apiInfo() {
@@ -47,16 +48,27 @@ public class SwaggerConfig {
                 "License of API", "API license URL", Collections.emptyList());
     }
 
-    private List<SecurityScheme> securitySchemes() {
-        return List.of(new  ApiKey(BEARER_AUTH, "Authorization", "header"));
+    private List<SecurityScheme> securitySchema() {
+        return listOf(new ApiKey(BEARER_AUTH, "Authorization", "header"));
     }
 
     private SecurityContext securityContext() {
-        return SecurityContext.builder().securityReferences(List.of(bearerAuthReference())).forPaths(PathSelectors.ant("/api/v1/application/**")).build();
+        return SecurityContext.builder().securityReferences(listOf( bearerAuthReference())).forPaths(PathSelectors.ant("/api/v1/application/**")).build();
     }
+
+
+
 
     private SecurityReference bearerAuthReference() {
         return new SecurityReference(BEARER_AUTH, new AuthorizationScope[0]);
+    }
+
+    @SafeVarargs
+    public static <T> List<T> listOf(T... elements) {
+        List<T> list = new ArrayList<>();
+        for (T e : elements)
+            list.add(e);
+        return Collections.unmodifiableList(list);
     }
 
 }
