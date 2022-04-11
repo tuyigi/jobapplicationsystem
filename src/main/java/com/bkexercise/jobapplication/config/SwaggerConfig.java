@@ -52,7 +52,7 @@ public class SwaggerConfig {
     }
 
     private SecurityContext securityContext() {
-        return SecurityContext.builder().securityReferences(List.of(bearerAuthReference())).forPaths(PathSelectors.ant("/api/v1/authenticate")).build();
+        return SecurityContext.builder().securityReferences(List.of(bearerAuthReference())).forPaths(PathSelectors.ant("/api/v1/application/**")).build();
     }
 
     private SecurityReference bearerAuthReference() {

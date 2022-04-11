@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -79,7 +80,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v1/authenticate/**").permitAll()
                 .antMatchers("/").permitAll()
                 .antMatchers("/api/v1/user").permitAll()
-                .antMatchers("/api/v1/application").permitAll()
+                .antMatchers(HttpMethod.POST,"/api/v1/application").permitAll()
                 .antMatchers("/api/v1/application/upload/**").permitAll()
                 .antMatchers("/api/v1/application/download/**").permitAll()
                 .antMatchers(AUTH_WHITELIST).permitAll()
